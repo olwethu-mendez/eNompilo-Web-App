@@ -1,0 +1,108 @@
+﻿@model eNompilo.v3._0._1.Models.Vaccination.DoseTracking
+@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext dbContext
+
+
+@{
+    ViewData["Title"] = "DoseTracking";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var patient = dbContext.tblPatient.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = p.FirstName + " " + p.LastName + " (" + p.IdNumber + ")",
+            }).ToList();
+
+    var vaccines = dbContext.tblVaccinationInventory.Where(ds => ds.Archived == false).Select(v => new SelectListItem
+            {
+                Value = v.ID.ToString(),
+                Text = v.VaccineName,
+            }).ToList();
+}
+
+<div class="margined-page">
+    <h2>Dose Tracking</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-4" style="margin-left:auto;margin-right:auto;">
+            <form asp-action="DoseTracking">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-4">
+                    <label asp-for="Patient" class="control-label"></label>
+                    <select asp-for="PatientId" class="form-control" asp-items="@(new SelectList(patient, "Value", "Text"))">
+                        <option disabled selected hidden>Please select an option</option>
+                    </select>
+                    <span asp-validation-for="PatientId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="VaccineInventoryId" class="control-label"></label>
+                    <select asp-for="VaccineInventoryId" class="form-control" id="roleChanged" asp-items="@(new SelectList(vaccines, "Value", "Text"))">
+                        <option disabled selected hidden>Please select an option</option>
+                    </select>
+                    <span asp-validation-for="VaccineInventoryId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="DateAdministered" class="control-label"></label>
+                    <input asp-for="DateAdministered" class="form-control" />
+                    <span asp-validation-for="DateAdministered" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="SecondDose" class="control-label"></label>
+                    <input asp-for="SecondDose" class="form-control" />
+                    <span asp-validation-for="SecondDose" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="SiteAddress" class="control-label"></label>
+                    <input asp-for="SiteAddress" class="form-control" />
+                    <span asp-validation-for="SiteAddress" class="text-danger"></span>
+                </div>
+
+                <span class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#doseTracking">Add Dose</span>
+
+                 
+
+                <div class="modal fade" id="doseTracking" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-danger">Dose Tracking</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                    Are you sure of the details of the details you provided?
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" value="Submit" class="btn btn-primary" />
+                                <span class="btn btn-secondary" data-bs-dismiss="modal">Close</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+</div>
+<div>
+    <a asp-action="ViewDoseTrackings">Back to List</a>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+    <script>
+
+        var strValue = "@((string)ViewBag.OutOfStockMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "error");
+        }
+
+
+    </script>}
+}

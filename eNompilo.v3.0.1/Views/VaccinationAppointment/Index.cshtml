@@ -1,0 +1,188 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.Vaccination.VaccinationAppointment>
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var user = _context.Users.Where(u => u.Id == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault();
+    int patientId = 0;
+    int practitionerId = 0;
+    if (User.IsInRole(RoleConstants.Patient))
+    {
+        patientId = _context.tblPatient.Where(p => p.UserId == user.Id).FirstOrDefault().Id;
+    }
+    else if (User.IsInRole(RoleConstants.Practitioner))
+    {
+        practitionerId = _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().Id;
+    }
+    List<Session> session = _context.tblSession.ToList();
+}
+
+@if (SignInManager.IsSignedIn(User))
+{
+
+    @if (User.IsInRole(RoleConstants.Patient))
+    {
+        <div class="margined-page pt-4">
+            <h1>Booking History</h1>
+
+            <p>
+                <a asp-action="Book">Book New Vaccination Appointment</a>
+            </p>
+            <table id="dtVacApp" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PreferredDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PreferredTime)
+                        </th>
+                        <th>
+                            Appointment State
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Where(p => p.PatientId == patientId && p.Archived == false).ToList())
+                    {
+                        <tr>
+                            <td data-cell="@Html.DisplayNameFor(model => model.PreferredDate)">
+                                @Convert.ToDateTime(item.PreferredDate).ToString("dd/MMM/yyyy")
+                            </td>
+                            <td data-cell="@Html.DisplayNameFor(model => model.PreferredTime)">
+                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                            </td>
+                            <td data-cell="Appointment State">
+                                @if (item.SessionConfirmed)
+                                {
+                                    <span class="text-success">Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</span>
+                                }
+                                else
+                                {
+                                    <span>Booking Pending</span>
+                                }
+                            </td>
+                            <td data-cel="Actions">
+                                @if (item.SessionConfirmed == false)
+                                {
+                                    <a asp-action="Update" asp-route-id="@item.Id"><i class="bi bi-pencil-fill"></i></a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Update" asp-route-id="@item.Id" style="pointer-events: none;"><i class="bi bi-pencil-fill text-secondary"></i></a>
+
+                                } |
+                                <a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-square-fill text-secondary"></i></a> |
+                                <a asp-action="Cancel" asp-route-id="@item.Id"><i class="bi bi-trash-fill text-danger"></i></a>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (User.IsInRole(RoleConstants.Receptionist) || (User.IsInRole(RoleConstants.Practitioner) && _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().PractitionerType == PractitionerType.Doctor || _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().PractitionerType == PractitionerType.Nurse))
+    {
+        <div class="margined-page pt-4">
+            <h1>Confirmed Appointments</h1>
+
+            <p>
+                <a asp-action="Book">Book New Family Vaccination</a>
+            </p>
+            <table id="dtVacApp" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+                <thead>
+                    <tr>
+                        <th>
+                            Previous Vaccination Status
+                        </th>
+                        <th>
+                            Previous Vaccine
+                        </th>
+                        <th>
+                            Pregnancy Status
+                        </th>
+                        <th>
+                            Vaccination For
+                        </th>
+                        <th>
+                            Preferred Date
+                        </th>
+                        <th>
+                            Preferred Time
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Patient)
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Where(p => p.PractitionerId == practitionerId && p.Archived == false && p.SessionConfirmed == true && session.All(x => x.VaccinationAppointmentId != p.Id)).ToList())
+                    {
+                        <tr>
+                            <td>
+                                @if(item.BeenVaccinated){<span>Vaccinated</span>}else{<span>Never Vaccinated</span>}
+                            </td>
+                            <td>
+                                @if(item.PreviousVaccine != null){ <span>@item.PreviousVaccine</span> }else{<span><em>No Previous Vaccine</em></span>
+                                }
+                            </td>
+                            <td>
+                                @if(item.IsPregnant){<span>Pregnant</span>}else{<span><em>Not Pregnant</em></span>}
+                            </td>
+                            <td>
+                                @item.VaccinableDiseases
+                            </td>
+                            <td>
+                                @Convert.ToDateTime(item.PreferredDate).ToString("dd/MMM/yyyy")
+                            </td>
+                            <td>
+                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                            </td>
+                            <td>
+                                @item.Patient.FirstName @item.Patient.LastName
+                            </td>
+                            <td>
+                                <a asp-action="Update" asp-route-id="@item.Id"><i class="bi bi-pencil-fill"></i></a> |
+                                <a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-square-fill text-secondary"></i></a> |
+                                <a asp-action="Cancel" asp-route-id="@item.Id"><i class="bi bi-trash-fill text-danger"></i></a> |
+                                <a asp-action="StartSession" asp-route-id="@item.Id"><i class="bi bi-check-square-fill text-success"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+    <script>
+
+        var strValue = "@((string)ViewBag.VASuccessMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "success");
+        }
+
+        var strValue = "@((string)ViewBag.VAUpdateSuccessMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "success");
+        }
+
+    </script>
+
+                            }

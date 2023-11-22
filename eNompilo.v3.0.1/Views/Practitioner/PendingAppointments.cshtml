@@ -1,0 +1,200 @@
+﻿@model eNompilo.v3._0._1.Models.ViewModels.AppointmentsViewModel
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@using eNompilo.v3._0._1.Constants;
+
+@{
+    ViewData["Title"] = "PendingAppointments";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+}
+
+<h1>Appointments History</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table id="dtPendingApps" class="table table-striped">
+    <thead>
+        <tr>
+            <th width="25%">
+                Patient Issues
+            </th>
+            <th width="15%">
+                Appointment Date
+            </th>
+            <th width="15%">
+                Appointment Time
+            </th>
+            <th width="20%">
+                Appointment Type
+            </th>
+            <th width="15%">
+                Patient
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.GenAppointmentList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PatientIssues)
+                </td>
+                <td>
+                    @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                    }
+                    else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                    }
+                </td>
+                <td>
+
+                    @Html.DisplayFor(modelItem => item.PreferredTime)
+
+                </td>
+                <td>
+                    General Appointment
+                </td>
+                <td>
+                    @item.Patient.FirstName @item.Patient.LastName (@item.Patient.IdNumber)
+                </td>
+                <td>
+                    <a asp-action="ConfirmGeneralAppointments" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="ConfirmGeneralAppointments" asp-route-id="@item.Id">Details</a> |
+                    @*<a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                </td>
+            </tr>
+        }
+        @if (User.IsInRole(RoleConstants.Practitioner) && _context.tblPractitioner.Where(p => p.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().PractitionerType == PractitionerType.Counsellor)
+        {
+            @foreach (var item in Model.CounsAppointmentList)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BookingReasons)
+                    </td>
+                    <td>
+                        @if (item.PreferredDate == DateTime.Now.Date)
+                        {
+                            @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning">(Due Today!)</span>
+                        }
+                        else if (item.PreferredDate < DateTime.Now.Date)
+                        {
+                            @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger">(Past Due!)</span>
+                        }
+                        else
+                        {
+                            <span>@Convert.ToDateTime(item.PreferredDate).ToString("dd-MM-yyyy")</span>
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PreferredTime)
+                    </td>
+                    <td>
+                        Counselling Appointment
+                    </td>
+                    <td>
+                        @item.Patient.FirstName @item.Patient.LastName (@item.Patient.IdNumber)
+                    </td>
+                    <td>
+                        <a asp-action="ConfirmCounsellingAppointments" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="ConfirmCounsellingAppointments" asp-route-id="@item.Id">Details</a> |
+                        @*<a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                    </td>
+                </tr>
+            }
+        }
+        @if (User.IsInRole(RoleConstants.Practitioner) && _context.tblPractitioner.Where(p => p.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().PractitionerType != PractitionerType.Counsellor)
+        {
+            @foreach (var item in Model.FPAppointmentList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BookingReasons)
+                </td>
+                <td>
+                    @if (item.PreferredDate == DateTime.Now.Date)
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning">(Due Today!)</span>
+                    }
+                    else if (item.PreferredDate < DateTime.Now.Date)
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger">(Past Due!)</span>
+                    }
+                    else
+                    {
+                        <span>@Convert.ToDateTime(item.PreferredDate).ToString("dd-MM-yyyy")</span>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PreferredTime)
+                </td>
+                <td>
+                    Family Planning
+                </td>
+                <td>
+                    @item.Patient.FirstName @item.Patient.LastName (@item.Patient.IdNumber)
+                </td>
+                <td>
+                    <a asp-action="ConfirmFamilyPlanningAppointments" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="ConfirmFamilyPlanningAppointments" asp-route-id="@item.Id">Details</a> |
+                    @*<a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                </td>
+            </tr>
+        }
+        @foreach (var item in Model.VaxAppointmentList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VaccinableDiseases)
+                </td>
+                <td>
+                    @if (item.PreferredDate == DateTime.Now.Date)
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning">(Due Today!)</span>
+                    }
+                    else if (item.PreferredDate < DateTime.Now.Date)
+                    {
+                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger">(Past Due!)</span>
+                    }
+                    else
+                    {
+                        <span>@Convert.ToDateTime(item.PreferredDate).ToString("dd-MM-yyyy")</span>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PreferredTime)
+                </td>
+                <td>
+                    Vaccination Appointment
+                </td>
+                <td>
+                    @item.Patient.FirstName @item.Patient.LastName (@item.Patient.IdNumber)
+                </td>
+                <td>
+                    <a asp-action="ConfirmVaccinationAppointments" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="ConfirmVaccinationAppointments" asp-route-id="@item.Id">Details</a> |
+                    @*<a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                </td>
+            </tr>
+        }
+        }
+        
+    </tbody>
+</table>

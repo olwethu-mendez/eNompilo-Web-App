@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="icon" type="image/x-icon" href="~/img/Adobe_Express_20230527_0911500_3_4496_-removebg-preview.png" />
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .auth-div{
+            display: flex;
+        }
+
+        .auth-pic-div{
+            position: fixed;
+            width: 50vw;
+            left: 0;
+        }
+        .auth-pic-div img{
+            width: 100%;
+        }
+        .auth-form-div{
+            width: 49vw;
+            position: absolute;
+            right: 0;
+        }
+
+        @@media (max-width: 768px) {
+            .auth-div {
+                flex-direction: column;
+            }
+
+            .auth-pic-div, .auth-form-div{
+                position: static;
+                width: 100%;
+                z-index: 10;
+            }
+
+            .auth-pic-div{
+                position: absolute;
+                top: 0;
+                height: 35%;
+                width: 100dvw;
+            }
+
+            .auth-pic-div img{
+                height: 100%;
+                object-fit: cover;
+                object-position:center;
+            }
+
+            .auth-form-div{
+                position: absolute;
+                top: 35%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="auth-div">
+        <div class="auth-pic-div" style="">
+            <img src="~/img/pexels-laura-james-6098057.jpg" alt="Laura James" style="width:100%;" />
+        </div>
+        <div class="auth-form-div" style="">
+            @RenderBody()
+        </div>
+
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

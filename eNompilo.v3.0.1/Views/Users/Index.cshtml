@@ -1,0 +1,85 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.SystemUsers.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    DateTime currentDate = DateTime.Today;
+    DateTime is30DaysAgo = currentDate.AddDays(-30);
+}
+
+<div class="margined-page pt-4">
+    <h1> System Users</h1>
+    <p>
+        <a asp-action="CreateUser">Add a new User</a>
+    </p>
+    <table id="dtUsers" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.IdNumber)
+                </th>
+                <th width="20%">
+                    Full Name
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                </th>
+                <th width="10%">
+                    @Html.DisplayNameFor(model => model.UserRole)
+                </th>
+                <th>
+                    Account Status
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td data-cell="@Html.DisplayNameFor(model => model.IdNumber)">
+                        @Html.DisplayFor(modelItem => item.IdNumber)
+                    </td>
+                    <td data-cell="Full Name">
+                        @Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.MiddleName) @Html.DisplayFor(modelItem => item.LastName) (@Html.DisplayFor(modelItem => item.Titles).)
+                    </td>
+                    <td data-cell="@Html.DisplayNameFor(model => model.Email)">
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    <td data-cell="@Html.DisplayNameFor(model => model.PhoneNumber)">
+                        <a href="tel:@Html.DisplayFor(modelItem => item.PhoneNumber)">@Html.DisplayFor(modelItem => item.PhoneNumber)</a>
+                    </td>
+                    <td data-cell="@Html.DisplayNameFor(model => model.UserRole)">
+                        @Html.DisplayFor(modelItem => item.UserRole)
+                    </td>
+
+                    @if (item.Archived)
+                    {
+                        <td class="text-danger" data-cell="Account Status"><strong>Account Disabled</strong></td>
+                    }
+                    else if (item.LastLogin < is30DaysAgo)
+                    {
+                        <td class="text-secondary" data-cell="Account Status"><strong>Account Idle</strong></td>
+                    }
+                    else
+                    {
+                        <td class="text-success" data-cell="Account Status"><strong>Account Active</strong></td>
+                    }
+
+                    <td data-cell="Actions">
+                        <a asp-action="EditUser" asp-route-id="@item.Id"><i class="bi bi-pencil-fill"></i></a> |
+                        <a asp-action="UserDetails" asp-route-id="@item.Id"><i class="bi bi-info-square-fill text-secondary"></i></a> 
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+</div>
+

@@ -1,0 +1,128 @@
+﻿@model eNompilo.v3._0._1.Models.Session
+
+@{
+	ViewData["Title"] = "Details";
+	Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+	<h4>Session</h4>
+	<hr />
+	<dl class="row">
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.Patient)
+		</dt>
+		<dd class="col-sm-7">
+			@Model.Patient.FirstName @Model.Patient.LastName
+		</dd>
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.Practitioner)
+		</dt>
+		<dd class="col-sm-7">
+			@Model.Practitioner.Users.Titles. @Model.Practitioner.Users.FirstName @Model.Practitioner.Users.LastName
+		</dd>
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.Arrived)
+		</dt>
+		@if (Model.Arrived)
+		{
+
+			<dd class="col-sm-7">
+				Yes
+			</dd>
+		}
+		else
+		{
+			<dd class="col-sm-7">
+				No
+			</dd>
+		}
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.ArrivalTime)
+		</dt>
+		<dd class="col-sm-7">
+			@Convert.ToDateTime(Model.ArrivalTime).ToString("HH:mm")
+		</dd>
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.PractitionerNotes)
+		</dt>
+		<dd class="col-sm-7">
+			@Html.DisplayFor(model => model.PractitionerNotes)
+		</dd>
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.ConditionIndication)
+		</dt>
+		@if (Model.ConditionIndication == true)
+		{
+			<dd class="col-sm-7">
+			Patient signs/symptoms indicate an underlying conditions
+			</dd>
+		}
+		else
+		{
+			<dd class="col-sm-7">
+			Patient doesn't seem to have any underlying condition.
+			</dd>
+		}
+		
+		@if(Model.ConditionIndication == true)
+		{
+			<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.PotentialCondition)
+		</dt>
+		<dd class="col-sm-7">
+			@Html.DisplayFor(model => model.PotentialCondition)
+		</dd>
+		}
+		
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.IsADanger)
+		</dt>
+
+		@if (Model.IsADanger == true)
+		{
+			<dd class="col-sm-7">Patient may be a danger to themselves</dd>
+		}
+		else
+		{
+			<dd class="col-sm-7">Patient poses no danger to themselves</dd>
+		}
+
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.IsAbused)
+		</dt>
+
+		@if (Model.IsAbused == true)
+		{
+
+			<dd class="col-sm-7">
+				Patient is an abuse victim
+			</dd>
+		}
+		else
+		{
+
+			<dd class="col-sm-7">
+				Patient is not abused
+			</dd>
+
+		}
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.Prescription)
+		</dt>
+		<dd class="col-sm-7">
+			@Html.DisplayFor(model => model.Prescription)
+		</dd>
+		<dt class="col-sm-5 mb-4">
+			@Html.DisplayNameFor(model => model.EndTime)
+		</dt>
+		<dd class="col-sm-7">
+			@Convert.ToDateTime(Model.EndTime).ToString("HH:mm")
+		</dd>
+	</dl>
+</div>
+<div>
+	<a asp-action="Index">Back to List</a>
+</div>

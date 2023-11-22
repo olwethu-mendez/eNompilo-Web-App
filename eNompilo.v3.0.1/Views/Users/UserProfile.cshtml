@@ -1,0 +1,915 @@
+﻿@model eNompilo.v3._0._1.Models.ViewModels.UserProfileViewModel
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "UserProfile";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    string profilePicture = "";
+
+    string middlename = "";
+    if (UserManager.GetUserAsync(User).Result.MiddleName != null) { middlename = " " + @UserManager.GetUserAsync(User).Result.MiddleName; }
+
+    string fullname = @UserManager.GetUserAsync(User).Result.FirstName + middlename + ' ' + @UserManager.GetUserAsync(User).Result.LastName;
+
+    var user = _context.Users.Where(u => u.Id == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault();
+    var patient = _context.tblPersonalDetails.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+
+    var admin = _context.tblAdmin.Where(p => p.UserId == user.Id).FirstOrDefault();
+    var practitioner = _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault();
+    var receptionist = _context.tblReceptionist.Where(p => p.UserId == user.Id).FirstOrDefault();
+    var medicalHistory = _context.tblMedicalHistory.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var generalAppointments = _context.tblGeneralAppointment.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var counsellingAppointments = _context.tblCounsellingAppointment.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var familyPlanningAppointments = _context.tblFamilyPlanningAppointment.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var vaccinationAppointments = _context.tblVaccinationAppointment.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var procedureAppointments = _context.tblMedicalProcedureAppointment.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+    var session = _context.tblSession.Where(p => p.Patient.UserId == user.Id).FirstOrDefault();
+
+    var dayOfLastLogin = (DateTime.UtcNow - user.CreatedOn).Days;
+    var userTypeAge = 0;
+
+    if (User.IsInRole(RoleConstants.Patient))
+    {
+        try
+        {
+            profilePicture = _context.tblPersonalDetails.Where(d => d.Patient.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().ProfilePicture;
+        }
+        catch (NullReferenceException)
+        {
+            profilePicture = "~/img/uploads/DefaultProfilePicture.png";
+        }
+        userTypeAge = (DateTime.Now.Subtract(Convert.ToDateTime(patient.DOB)).Days) / 365;
+    }
+    else if (User.IsInRole(RoleConstants.Admin))
+    {
+        try
+        {
+            profilePicture = _context.tblAdmin.Where(d => d.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().ProfilePicture;
+        }
+        catch (NullReferenceException)
+        {
+            profilePicture = "~/img/uploads/DefaultProfilePicture.png";
+        }
+        userTypeAge = (DateTime.Now.Subtract(Convert.ToDateTime(admin.DOB)).Days) / 365;
+    }
+    else if (User.IsInRole(RoleConstants.Practitioner))
+    {
+        try
+        {
+            profilePicture = _context.tblPractitioner.Where(d => d.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().ProfilePicture;
+        }
+        catch (NullReferenceException)
+        {
+            profilePicture = "~/img/uploads/DefaultProfilePicture.png";
+        }
+        userTypeAge = (DateTime.Now.Subtract(Convert.ToDateTime(practitioner.DOB)).Days) / 365;
+    }
+    else if (User.IsInRole(RoleConstants.Receptionist))
+    {
+        try
+        {
+            profilePicture = _context.tblReceptionist.Where(d => d.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().ProfilePicture;
+        }
+        catch (NullReferenceException)
+        {
+
+            profilePicture = "~/img/uploads/DefaultProfilePicture.png";
+        }
+        userTypeAge = (DateTime.Now.Subtract(Convert.ToDateTime(receptionist.DOB)).Days) / 365;
+
+    }
+
+    var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+}
+
+
+<div class="margined-page" style="margin-top: -100px;">
+    <h1 class="text-start">User Profile</h1><br />
+
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        @if (User.IsInRole(RoleConstants.Patient))
+        {
+            <table class="table table-borderless">
+                <thead style="font-size: 1.125rem;" class="table">
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr>
+                        <th class="unhid" data-cell="Profile Picture" rowspan="4">
+                            <span class="d-flex justify-content-center align-items-center">
+                                @if (profilePicture == "~/img/uploads/DefaultProfilePicture.png" || profilePicture == null || profilePicture == "")
+                                {
+                                    <img src="~/img/uploads/DefaultProfilePicture.png" style="width:200px;" class="rounded-circle me-2">
+                                }
+                                else
+                                {
+                                    <img src="@("~/img/uploads/"+profilePicture)" asp-append-version="true" class="rounded-circle me-2" style="width:200px; object-fit:cover;" />
+                                }
+                            </span>
+                        </th>
+                        <th class="unhid" data-cell="User Role" colspan="3">
+                            <h4>@UserManager.GetUserAsync(User).Result.UserRole</h4>
+                        </th>
+                    </tr>
+                    <tr>
+                        <td data-cell="Username">@UserManager.GetUserAsync(User).Result.IdNumber</td>
+                        <td data-cell="Phone Number">@UserManager.GetUserAsync(User).Result.PhoneNumber</td>
+                        <td class="toBeHid">Days Since Account Created</td>
+                    </tr>
+                    <tr>
+                        <td data-cell="Full Name">@fullname</td>
+                        <td data-cell="Email Address">@UserManager.GetUserAsync(User).Result.Email</td>
+                        <td data-cell="Days since account created">@dayOfLastLogin days ago</td>
+                    </tr>
+                    <tr>
+                        <td data-cell="Gender">@_context.tblPersonalDetails.Where(p=>p.Patient.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().Gender</td>
+                        <td data-cell="Age">@userTypeAge</td>
+                        <td data-cell="More"><a asp-action="EditUser" asp-controller="Users" asp-route-id="@user.Id"><i class="bi bi-pencil-fill me-2"></i>Edit User</a></td>
+                    </tr>
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                </thead>
+                <tbody>
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr class="toBeHid"><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr>
+                        <th class="unhid" colspan="4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="unhid" colspan="4"><h4>Personal Details</h4></th>
+                                    <tr class="toBeHid"><th colspan="2" width="50%">Personal Bio</th><th colspan="2" width="50%">Additional Details</th></tr>
+                    </tr>
+                    </thead>
+                <tbody>
+                    <tr><th class="toBeHid">Full Name: </th><td data-cell="Full Name">@fullname</td><th class="toBeHid">Emergency Contact Person: </th><td data-cell="Emergeny Contact">@patient.EmergencyPerson</td></tr>
+                    <tr><th class="toBeHid">Date of Birth: </th><td data-cell="Date Of Birth">@Convert.ToDateTime(patient.DOB).ToString("dd MMM yyyy")</td><th class="toBeHid">Emergency Contact Nr: </th><td data-cell="Emergeny Contact Details">@patient.EmergenyContactNr</td></tr>
+                    <tr>
+                        <th class="toBeHid">Weight: </th>
+                                        @if (patient.Weight != null)
+                                        {
+                            <td data-cell="Weight">@patient.Weight kg</td>
+                                        }
+                                        else
+                                        {
+                            <td></td>
+                                        }
+
+                                        @if (patient.Employed == true)
+                                        {
+                            <th class="toBeHid">Employment Status: </th>
+                            <td data-cell="Employment Status">Employed</td>
+                                        }
+                                        else
+                                        {
+                            <th class="toBeHid">Employment Status: </th>
+                            <td data-cell="Employment Status">Unemployed</td>
+                                        }
+                    </tr>
+                    <tr>
+                        <th class="toBeHid">Height: </th>
+                                        @if (patient.Height != null)
+                                        {
+                            <td data-cell="Height">@patient.Height M</td>
+                                        }
+                                        else
+                                        {
+                            <td data-cell="Height"></td>
+                                        }
+
+                        <th class="toBeHid">Work Email: </th>
+                        <td data-cell="Work Email">@patient.WorkEmail</td>
+                    </tr>
+                    <tr>
+                        <th class="toBeHid">Blood Type: </th>
+                        <td data-cell="Blood Type">@patient.BloodType</td>
+                        <th class="toBeHid">Work Tel: </th>
+                        <td data-cell="Work Tel">@patient.WorkTel</td>
+                    </tr>
+                    <tr>
+                        <th class="toBeHid">Citizenship: </th>
+                        <td data-cell="Citizenship">@patient.Citizenship.GetDisplayName()</td>
+                        <th class="toBeHid">Home Tel: </th>
+                        <td data-cell="Home Tell">@patient.HomeTel</td>
+                    </tr>
+                    <tr>
+                        <th class="toBeHid">Marital Status: </th>
+                        <td data-cell="Marital Status">@patient.MaritalStatus.GetDisplayName()</td>
+                        <th class="toBeHid">Address: </th>
+                        <td data-cell="Address">
+                                            @patient.AddressLine1, @if (@patient.AddressLine2 != null)
+                                            {
+                                                @patient.AddressLine2
+
+                                <span>,</span>
+                                            } @if (@patient.Suburb != null)
+                                            {
+                                                @patient.Suburb
+
+                                <span>,</span>
+                                            } @patient.City, @patient.Province.GetDisplayName(), @patient.ZipCode
+                        </td>
+                    </tr>
+                    <tr><th class="unhid" colspan="4"><a asp-controller="Patient" asp-action="EditPersonalDetails" asp-route-id="@_context.tblPersonalDetails.Where(p=>p.Patient.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().Id"><i class="bi bi-pencil-fill"></i> Edit Personal Details</a></th></tr>
+                </tbody>
+            </table>
+            </th>
+            </tr>
+            <tr>
+                <th class="unhid" colspan="4">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="unhid" colspan="5"><h4>Appointment History</h4></th>
+                            </tr>
+                            <tr><th width="30%">Date</th><th width="25%">Time</th><th width="45%">Confirmed Practitioner</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><th class="unhid" colspan="3"><center>General Appointments</center></th></tr>
+                                    @foreach (var item in Model.GeneralAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                <tr>
+                                    <td data-cell="Appointment Date">
+
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                    </td>
+                                    <td data-cell="Appointment Time">
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                    </td>
+                                    <td data-cell="Confirmation Status">
+                                                @if (item.SessionConfirmed)
+                                                {
+                                            <span class="text-success"><strong>Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                            <span><strong>Booking Pending</strong></span>
+                                                }
+                                    </td>
+                                </tr>
+                                    }
+                            <tr><th class="unhid" colspan="3"><center>Counselling Appointments</center></th></tr>
+                                    @foreach (var item in Model.CounsellingAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                <tr>
+                                    <td data-cell="Appointment Date">
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                    </td>
+                                    <td data-cell="Appointment Time">
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                    </td>
+                                    <td data-cell="Confirmation Status">
+                                                @if (item.SessionConfirmed)
+                                                {
+                                            <span class="text-success"><strong>Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                            <span><strong>Booking Pending</strong></span>
+                                                }
+                                    </td>
+                                </tr>
+                                    }
+                            <tr><th class="unhid" colspan="3"><center>Family Planning Appointments</center></th></tr>
+                                    @foreach (var item in Model.FPAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                <tr>
+                                    <td data-cell="Appointment Date">
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                    </td>
+                                    <td data-cell="Appointment Time">
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                    </td>
+                                    <td data-cell="Confirmation Status">
+                                                @if (item.SessionConfirmed)
+                                                {
+                                            <span class="text-success"><strong>Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                            <span><strong>Booking Pending</strong></span>
+                                                }
+                                    </td>
+                                </tr>
+                                    }
+                            <tr><th class="unhid" colspan="3"><center>Vaccination Appointments</center></th></tr>
+                                    @foreach (var item in Model.VaccinationAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                <tr>
+                                    <td data-cell="Appointment Date">
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                    </td>
+                                    <td data-cell="Appointment Time">
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                    </td>
+                                    <td data-cell="Confirmation Status">
+                                                @if (item.SessionConfirmed)
+                                                {
+                                            <span class="text-success"><strong>Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                            <span><strong>Booking Pending</strong></span>
+                                                }
+                                    </td>
+                                </tr>
+                                    }
+                            <tr><th class="unhid" colspan="3"><center>Medical Procedure Appointments</center></th></tr>
+                                    @foreach (var item in Model.SMPAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                <tr>
+                                    <td data-cell="Appointment Date">
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                    </td>
+                                    <td data-cell="Appointment Time">
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                    </td>
+                                    <td data-cell="Confirmation Status">
+                                                @if (item.SessionConfirmed)
+                                                {
+                                            <span class="text-success"><strong>Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                            <span><strong>Booking Pending</strong></span>
+                                                }
+                                    </td>
+                                </tr>
+                                    }
+
+
+                        </tbody>
+                    </table>
+                </th>
+            </tr>
+            <tr>
+
+                <th class="unhid" colspan="2">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="unhid" colspan="2"><h4>Medical History</h4></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="toBeHid">Previous Diagnosis</td><td data-cell="Previous Diagnosis">@medicalHistory.PreviousDiagnoses</td></tr>
+                            <tr><td class="toBeHid">Previous Medication</td><td data-cell="Previous Medication">@medicalHistory.PreviousMedication</td></tr>
+                            <tr><td class="toBeHid">General Allergies</td><td data-cell="General Allergies">@medicalHistory.GeneralAllergies</td></tr>
+                            <tr><td class="toBeHid">Medical Allergies</td><td data-cell="Medical Allergies">@medicalHistory.MedicationAllergies</td></tr>
+                        </tbody>
+                    </table>
+                </th>
+                <th class="unhid" colspan="2">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="unhid" colspan="2"><h4>Diagnosis & Medication</h4></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                    @foreach (var item in Model.Sessions)
+                                    {
+                                <tr>
+                                            @if (item.Prescription != null)
+                                            {
+                                        <td data-cell="Prescribed Medication">
+                                                    @item.Prescription
+                                        </td>
+                                            }
+                                            else
+                                            {
+                                        <td data-cell="Past Prescribed Medication"></td>
+                                            }
+                                            @if (item.PotentialCondition != null)
+                                            {
+                                        <td data-cell="Potential Diagnosis">
+                                                    @item.PotentialCondition
+                                        </td>
+                                            }
+                                            else
+                                            {
+                                        <td data-cell="Potential Diagnosis"></td>
+                                            }
+                                </tr>
+                                    }
+                        </tbody>
+                    </table>
+                </th>
+            </tr>
+            <tr>
+                <th class="unhid">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="unhid"><h4>Vacination Certificates</h4></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                    @foreach (var item in Model.DoseTrackings)
+                                    {
+                                <tr>
+                                    <td data-cell="Vaccination Certificate Nr: @item.CertificateNo">
+                                        <a asp-controller="Vaccination" asp-action="Certificate" asp-route-id="@item.ID">Certificate for @item.VaccinationInventory.VaccineName (@item.CertificateNo)</a>
+                                    </td>
+                                </tr>
+                                    }
+                        </tbody>
+                    </table>
+                </th>
+            </tr>
+
+            </tbody>
+            </table>
+
+        }
+        else if (User.IsInRole(RoleConstants.Admin))
+        {
+            <table class="table table-borderless">
+                <thead style="font-size: 1.125rem;" class="table">
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr>
+                        <th rowspan="4">
+                            <span class="d-flex justify-content-center align-items-center">
+                                @if (profilePicture == "~/img/uploads/DefaultProfilePicture.png" || profilePicture == null || profilePicture == "")
+                                {
+                                    <img src="~/img/uploads/DefaultProfilePicture.png" style="width:175px;" class="rounded-circle me-2">
+                                }
+                                else
+                                {
+                                    <img src="@("~/img/uploads/"+profilePicture)" asp-append-version="true" class="rounded-circle me-2" style="width:175px; object-fit:cover;" />
+                                }
+                            </span>
+                        </th>
+                        <th colspan="3">
+                            <h4>@UserManager.GetUserAsync(User).Result.UserRole</h4>
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>@UserManager.GetUserAsync(User).Result.IdNumber</td>
+                        <td>@UserManager.GetUserAsync(User).Result.PhoneNumber</td>
+                        <td>Days Since Account Created</td>
+                    </tr>
+                    <tr>
+                        <td>@fullname</td>
+                        <td>@UserManager.GetUserAsync(User).Result.Email</td>
+                        <td>@dayOfLastLogin days ago</td>
+                    </tr>
+                    <tr>
+                        <td>@admin.Gender</td>
+                        <td colspan="2">@userTypeAge</td>
+                    </tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        }
+        else if (User.IsInRole(RoleConstants.Practitioner))
+        {
+            <table class="table table-borderless">
+                <thead style="font-size: 1.125rem;" class="table">
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr>
+                        <th rowspan="4">
+                            <span class="d-flex justify-content-center align-items-center">
+                                @if (profilePicture == "~/img/uploads/DefaultProfilePicture.png" || profilePicture == null || profilePicture == "")
+                                {
+                                    <img src="~/img/uploads/DefaultProfilePicture.png" style="width:200px;" class="rounded-circle me-2">
+                                }
+                                else
+                                {
+                                    <img src="@("~/img/uploads/"+profilePicture)" asp-append-version="true" class="rounded-circle me-2" style="width:200px; object-fit:cover;" />
+                                }
+                            </span>
+                        </th>
+                        <th colspan="3">
+                            @if (practitioner.PractitionerType != PractitionerType.Counsellor)
+                            {
+                                <h4>@practitioner.PractitionerType</h4>
+                            }
+                            else
+                            {
+                                <h4>@practitioner.PractitionerType (@practitioner.CounsellorType.GetDisplayName())</h4>
+                            }
+
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>@UserManager.GetUserAsync(User).Result.IdNumber</td>
+                        <td>@UserManager.GetUserAsync(User).Result.PhoneNumber</td>
+                        <td>Days Since Account Created</td>
+                    </tr>
+                    <tr>
+                        <td>@fullname</td>
+                        <td>@UserManager.GetUserAsync(User).Result.Email</td>
+                        <td>@dayOfLastLogin days ago</td>
+                    </tr>
+                    <tr>
+                        <td>@practitioner.Gender</td>
+                        <td colspan="2">@userTypeAge</td>
+                    </tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr><td colspan="4"><!--Just for empty Space between header and body--></td></tr>
+                    <tr>
+                        <td colspan="4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4"><h4>Personal Details</h4></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><th>Full Name: </th><td>@fullname</td><th>Emergency Contact Person: </th><td>@practitioner.EmergencyPerson</td></tr>
+                                    <tr><th>Date of Birth: </th><td>@Convert.ToDateTime(practitioner.DOB).ToString("dd MMM yyyy")</td><th>Emergency Contact Nr: </th><td>@practitioner.EmergenyContactNr</td></tr>
+                                    <tr>
+                                        <th>Practitioner Type: </th>
+                                        <td>@practitioner.PractitionerType.GetDisplayName()</td>
+                                        @if (practitioner.CounsellorType == null)
+                                        {
+                                            <th>Counsellor Type: </th>
+                                            <td>Is not a counsellor</td>
+                                        }
+                                        else
+                                        {
+                                            <th>Counsellor Type: </th>
+                                            <td>@practitioner.CounsellorType.GetDisplayName()</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <th>Work Email: </th>
+                                        <td>@practitioner.WorkEmail</td>
+                                        <th>Work Tel: </th>
+                                        <td>@practitioner.WorkTel</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Citizenship: </th>
+                                        <td>@practitioner.Citizenship.GetDisplayName()</td>
+                                        <th>Home Tel: </th>
+                                        <td>@practitioner.HomeTel</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Marital Status: </th>
+                                        <td>@practitioner.MaritalStatus.GetDisplayName()</td>
+                                        <th>Address: </th>
+                                        <td>
+                                            @practitioner.AddressLine1, @if (practitioner.AddressLine2 != null)
+                                            {
+                                                @practitioner.AddressLine2
+
+                                                <span>,</span>
+                                            } @if (practitioner.Suburb != null)
+                                            {
+                                                @practitioner.Suburb
+
+                                                <span>,</span>
+                                            } @practitioner.City, @practitioner.Province.GetDisplayName(), @practitioner.ZipCode
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Line Manager: </th>
+                                        <td>@practitioner.LineManager</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2"><h4>Appointment History</h4></th>
+                                    </tr>
+                                    <tr><th width="30%">Date</th><th width="25%">Time</th><th width="45%">Confirmed Practitioner</th></tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr><th colspan="3"><center>General Appointments</center></th></tr>
+                                    @foreach (var item in Model.GeneralAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                    {
+                                        <tr>
+                                            <td>
+
+                                                @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                }
+                                                else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                            </td>
+                                            <td>
+                                                @if (item.SessionConfirmed)
+                                                {
+                                                    <span class="text-success"><strong>Booking confirmed for @item.Patient.Users.Titles. @item.Patient.Users.FirstName @item.Patient.Users.LastName</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    <span><strong>Booking Pending</strong></span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+
+                                    @if (practitioner.PractitionerType == PractitionerType.Counsellor)
+                                    {
+                                        <tr><th colspan="3"><center>Counselling Appointments</center></th></tr>
+                                        @foreach (var item in Model.CounsellingAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                        {
+                                            <tr>
+                                                <td>
+
+                                                    @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                    }
+                                                    else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                                </td>
+                                                <td>
+                                                    @if (item.SessionConfirmed)
+                                                    {
+                                                        <span class="text-success"><strong>Booking confirmed for @item.Patient.Users.Titles. @item.Patient.Users.FirstName @item.Patient.Users.LastName</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span><strong>Booking Pending</strong></span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else if (practitioner.PractitionerType != PractitionerType.Counsellor)
+                                    {
+                                        <tr><th colspan="3"><center>Family Planning Appointments</center></th></tr>
+                                        @foreach (var item in Model.FPAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                        {
+                                            <tr>
+                                                <td>
+
+                                                    @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                    }
+                                                    else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                                </td>
+                                                <td>
+                                                    @if (item.SessionConfirmed)
+                                                    {
+                                                        <span class="text-success"><strong>Booking confirmed for @item.Patient.Users.Titles. @item.Patient.Users.FirstName @item.Patient.Users.LastName</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span><strong>Booking Pending</strong></span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        <tr><th colspan="3"><center>Vaccination Appointments</center></th></tr>
+                                        @foreach (var item in Model.VaccinationAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                        {
+                                            <tr>
+                                                <td>
+
+                                                    @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                    }
+                                                    else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                                </td>
+                                                <td>
+                                                    @if (item.SessionConfirmed)
+                                                    {
+                                                        <span class="text-success"><strong>Booking confirmed for @item.Patient.Users.Titles. @item.Patient.Users.FirstName @item.Patient.Users.LastName</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span><strong>Booking Pending</strong></span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        <tr><th colspan="3"><center>Specialized Medical Procedures Appointments</center></th></tr>
+                                        @foreach (var item in Model.SMPAppointment.OrderBy(ga => ga.PreferredDate).OrderBy(ga => ga.PreferredTime).ToList())
+                                        {
+                                            <tr>
+                                                <td>
+
+                                                    @if ((item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) == currentTime) || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) > currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-warning"><strong>(Due Today!)</strong></span>
+                                                    }
+                                                    else if (item.PreferredDate < DateTime.Now.Date || (item.PreferredDate == DateTime.Now.Date && TimeOnly.FromDateTime(Convert.ToDateTime(item.PreferredTime)) < currentTime))
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-danger"><strong>(Passed Appointment!)</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.DisplayFor(modelItem => item.PreferredDate) <span class="text-success"><strong>(Upcoming!)</strong></span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                                                </td>
+                                                <td>
+                                                    @if (item.SessionConfirmed)
+                                                    {
+                                                        <span class="text-success"><strong>Booking confirmed for @item.Patient.Users.Titles. @item.Patient.Users.FirstName @item.Patient.Users.LastName</strong></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span><strong>Booking Pending</strong></span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }                                    }
+
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3"><h4>Issued Diagnosis & Medication</h4></th>
+                                    </tr>
+                                    <tr>
+                                        <th>Diagnosis</th>
+                                        <th>Prescription</th>
+                                        <th>Patient</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Sessions)
+                                    {
+                                        <tr>
+                                            @if (item.PotentialCondition != null)
+                                            {
+                                                <td>
+                                                    @item.PotentialCondition
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>N/A</td>
+                                            }
+                                            @if (item.Prescription != null)
+                                            {
+                                                <td>
+                                                    @item.Prescription
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>N/A</td>
+                                            }
+                                            @if (item.Prescription != null || item.PotentialCondition != null)
+                                            {
+                                                <td>
+                                                    @item.Patient.Titles. @item.Patient.FirstName @item.Patient.LastName (@item.Patient.IdNumber)
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>N/A</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        }
+    }
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+    <script>
+
+        var strValue = "@((string)ViewBag.SuccessMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "success");
+        }
+
+    </script>
+
+                            }

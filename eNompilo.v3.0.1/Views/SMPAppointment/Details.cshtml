@@ -1,0 +1,126 @@
+﻿@model eNompilo.v3._0._1.Models.SMP.SMPAppointment
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+
+
+<div class="margined-page pt-4">
+    <div>
+        <h2>Your Upcoming Appointments(s)</h2>
+        <hr />
+        <dl class="row" style="margin-left:auto; margin-right:auto;">
+            <dt class="col-sm-2 mb-4">
+                Patient Names
+            </dt>
+            <dd class="col-sm-10">
+                @Model.Patient.FirstName @Model.Patient.MiddleName @Model.Patient.LastName (@Model.Patient.IdNumber)
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Reaction To Anaesthesia
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.AnaesthesiaReaction)
+                {
+                    <span>I have had a serious reaction</span>
+                }
+                else
+                {
+                    <span>I have not had a reaction</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Nature Of Reaction
+
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.NatureOfReaction != null)
+                {
+                    @Html.DisplayFor(Model=>Model.NatureOfReaction)
+                }
+                else
+                {
+                    <span>N/A</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Breathing Tube Surgery
+            </dt>
+            <dd class="col-sm-10">
+                @*<input class="form-check-input" asp-for="BreathingtubeSurgery" />*@
+                @if (Model.BreathingtubeSurgery)
+                {
+                    <span>Yes</span>
+                }
+                else
+                {
+                    <span>No</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Movement Difficulties
+            </dt>
+            <dd class="col-sm-10">
+                @*<input class="form-check-input" asp-for="Movement" />*@
+                @if (Model.Movement)
+                {
+                    <span>Yes</span>
+                }
+                else
+                {
+                    <span>No</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Has had a heart attack
+            </dt>
+            <dd class="col-sm-10">
+                @*<input class="form-check-input" asp-for="HeartAttack" />*@
+                @if (Model.HeartAttack)
+                {
+                    <span>Yes</span>
+                }
+                else
+                {
+                    <span>No</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Date Of Heart Attack
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.HeartAttackDate != null)
+                {
+                    @Html.DisplayFor(Model=>Model.HeartAttackDate)
+                }
+                else
+                {
+                    <span>N/A</span>
+                }
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Preferred Date
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(Model=>Model.PreferredDate)
+            </dd>
+            <dt class="col-sm-2 mb-4">
+                Preferred Time
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(Model=>Model.PreferredTime)
+            </dd>
+            @*<dt class="col-sm-2 mb-4">
+                Patient Name(s)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Patient.FirstName) @Html.DisplayFor(model => model.Patient.LastName)
+            </dd>*@
+        </dl>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

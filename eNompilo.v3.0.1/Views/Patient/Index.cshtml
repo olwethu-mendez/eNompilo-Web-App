@@ -1,0 +1,60 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.SystemUsers.Patient>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="margined-page pt-4" style="margin-left:auto;margin-right:auto;">
+    <h1>System Patients</h1>
+
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    <table id="dtPatient" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.IdNumber)
+                </th>
+                <th>
+                    Full Name
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                </th>
+                @* <th></th> *@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td data-cell="@Html.DisplayNameFor(model => model.IdNumber)">
+                        @Html.DisplayFor(modelItem => item.IdNumber)
+                    </td>
+                    <td data-cell="Full Name">
+                        @Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.MiddleName) @Html.DisplayFor(modelItem => item.LastName) (@Html.DisplayFor(modelItem => item.Titles).)
+                    </td>
+                    <td data-cell="@Html.DisplayNameFor(model => model.Email)">
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    <td data-cell="@Html.DisplayNameFor(model => model.PhoneNumber)">
+                        @Html.DisplayFor(modelItem => item.PhoneNumber)
+                    </td>
+                    @* <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td> *@
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+

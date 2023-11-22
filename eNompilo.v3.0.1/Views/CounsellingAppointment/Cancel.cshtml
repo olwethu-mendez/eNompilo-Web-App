@@ -1,0 +1,93 @@
+﻿@model eNompilo.v3._0._1.Models.ViewModels.ArchiveItemViewModel
+
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Areas.Identity.Data;
+@using eNompilo.v3._0._1.Models.Counselling;
+
+@inject ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Cancel";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var counselling = _context.tblCounsellingAppointment.Where(va => va.Id == Model.Id).FirstOrDefault();
+
+}
+
+
+
+
+<div class="margined-page pt-4">
+
+<h1>Cancel</h1>
+
+<h2>Are you sure you want to cancel this appointment?</h2>
+<div>
+    <hr />
+    <dl class="row" style="margin-left:auto;margin-right:auto;">
+        <dt class = "col-sm-3">
+            Preferred Attendance:
+        </dt>
+        <dd class = "col-sm-9">
+            @counselling.SessionPreference
+        </dd>
+        <dt class = "col-sm-2 mb-4">
+            Booking Reasons
+        </dt>
+        <dd class = "col-sm-10">
+                @counselling.BookingReasons
+        </dd>
+        
+        <dt class = "col-sm-2 mb-4">
+            Preferred Date
+        </dt>
+        <dd class = "col-sm-10">
+                @Convert.ToDateTime(counselling.PreferredDate).ToString("dd MMM yyyy")
+        </dd>
+        <dt class = "col-sm-2 mb-4">
+            Preferred Time
+        </dt>
+        <dd class = "col-sm-10">
+                @Convert.ToDateTime(counselling.PreferredTime).ToString("HH:mm")
+        </dd>
+    </dl>
+    
+    <form asp-action="Cancel" method="post">
+        <input type="hidden" asp-for="Id" />
+            <div class="form-group form-check mb-4">
+                <label class="form-check-label">
+                    Tick the checkbox to confirm you are cancelling this appointment
+                    <input class="form-check-input" id="archiveElmnt" asp-for="Archived" />
+                </label>
+                </div>
+        <input type="submit" id="btnSubmit" value="Cancel Appointment" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        window.onload = function () {
+            var checkbox = document.getElementById('archiveElmnt');
+            var button = document.getElementById('btnSubmit');
+
+            checkbox.addEventListener('change', function () {
+                if (checkbox.checked) {
+                    button.disabled = false;
+                } else {
+                    button.disabled = true;
+                }
+            });
+
+            // Trigger change event to set initial visibility
+            checkbox.dispatchEvent(new Event('change'));
+        };
+    </script>
+}
+
+
+

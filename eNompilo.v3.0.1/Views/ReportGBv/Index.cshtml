@@ -1,0 +1,63 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.GBV.ReportGBV>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="margined-page pt-4">
+    <h1>Index</h1>
+
+    <p>
+        <a asp-action="report">Report GBV Now</a>
+    </p>
+    <table id="dtRepGbv" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+        <thead>
+            <tr>
+                <th>
+                    I am the:
+                </th>
+                <th>
+                    Would you like to stay anonymous:
+                </th>
+                <th>
+                    Incident Type:
+                </th>
+                <th>
+                    Preferred method of comunication:
+                </th>
+                <th>
+                    Would you like to be booked for counselling:
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(ModelItem => item.Role)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(ModelItem => item.IdentityType)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(ModelItem => item.IncidentType)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(ModelItem => item.CommunicationType)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(ModelItem => item.CounsellingBooking)
+                    </td>
+                    <td>
+                        <a asp-action="Update" asp-route-id="@item.Id">Update</a> |
+                        <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

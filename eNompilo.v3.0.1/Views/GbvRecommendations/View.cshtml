@@ -1,0 +1,75 @@
+﻿@model eNompilo.v3._0._1.Models.GBV.GbvRecommendations
+@inject IHttpContextAccessor contextAccessor;
+
+@{
+    ViewData["Title"] = "View";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="row pt-2">
+    <button onclick="window.print()" class="btn btn-primary col-2">
+        <i class="bx bxs-printer" style="color:#01acff"></i>
+        Print
+    </button>
+</div>
+
+<div class="card-container" style="display:flex;justify-content:center">
+    @*  <div class="card login-logout-card" style="width:25%;border-radius:40px;"> *@
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-10 my-4">
+                <div class="row">
+                    <div class="col-12">
+                        <section>
+                            <div class="card-img" style="text-align:center; padding-top:20px">
+                                <a asp-controller="Home" asp-action="Index"><img src="~/img/Adobe_Express_20230527_0911500_1[4494].png" style="width:150px;" class="auth-image" /></a>
+                            </div>
+                            <div style=" height: 10px;"></div>
+                            <form asp-action="GbvRecommendations" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-floating">
+                                    <h1>Details</h1>
+
+                                    <dl>
+                                        <dt>Name of Practitioner :</dt>
+                                        <dd>@Model.Practitioner.Users.FirstName @Model.Practitioner.Users.LastName</dd>
+                                        <dt>Name of Patient :</dt>
+                                        <dd>@Model.Patient.Users.FirstName @Model.Patient.Users.LastName</dd>
+                                        <dt>Date of Recommendation:</dt>
+                                        <dd>@Html.DisplayFor(Model =>Model.Date)</dd>
+                                        <dt>Practitioner Recommendation:</dt>
+                                        <dd>@Html.DisplayFor(Model =>Model.PractitionerRecommendation)</dd>
+                                    </dl>
+
+                                </div>
+
+                            </form>
+                            <br />
+
+                            <div style=" height: 10px;"></div>
+                            <div class="text-center">
+                                <a asp-action="Index">Back to Recommendations List</a>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* </div> *@
+</div>
+  
+
+
+
+
+
+
+ 
+                        
+
+
+
+        
+
+        

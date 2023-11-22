@@ -1,0 +1,282 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.SMP.SMPAppointment>
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var user = _context.Users.Where(u => u.Id == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault();
+    int patientId = 0;
+    int practitionerId = 0;
+    if (User.IsInRole(RoleConstants.Patient))
+    {
+        patientId = _context.tblPatient.Where(p => p.UserId == user.Id).FirstOrDefault().Id;
+    }
+    else if (User.IsInRole(RoleConstants.Practitioner))
+    {
+        practitionerId = _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().Id;
+    }
+}
+
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (User.IsInRole(RoleConstants.Patient))
+    {
+        <div class="margined-page pt-4">
+            <h1>Specialized Medical Procedures</h1>
+
+            <p><a asp-action="SMPBookAppointment">Book New Medical Procedure Appointment</a></p>
+            <table id="SMPApp1" class="table table-striped" style="margin-left:auto; margin-right:auto;">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PreferredDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PreferredTime)
+                        </th>
+                        <th>
+                            Appointment State
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Where(p => p.PatientId == patientId && p.Archived == false).ToList())
+                    {
+                        <tr>
+                            <td>
+                                @Convert.ToDateTime(item.PreferredDate).ToString("dd/MMM/yyyy")
+                            </td>
+                            <td>
+                                @Convert.ToDateTime(item.PreferredTime).ToString("HH:mm")
+                            </td>
+                            <td>
+                                @if (item.SessionConfirmed)
+                                {
+                                    <span class="text-success">Booking confirmed with @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</span>
+                                }
+                                else
+                                {
+                                    <span>Booking Pending</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.SessionConfirmed == false)
+                                {
+                                    <a asp-action="Update" asp-route-id="@item.Id"><i class="bi bi-pencil-fill"></i></a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Update" asp-route-id="@item.Id" style="pointer-events: none;"><i class="bi bi-pencil-fill text-secondary"></i></a>
+                                }
+                                <a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-square-fill text-secondary"></i></a> |
+                                <a asp-action="Cancel" asp-route-id="@item.Id"><i class="bi bi-trash-fill text-danger"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+else if (User.IsInRole(RoleConstants.Receptionist) || ((User.IsInRole(RoleConstants.Practitioner) && _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().PractitionerType == PractitionerType.Doctor || _context.tblPractitioner.Where(p => p.UserId == user.Id).FirstOrDefault().PractitionerType == PractitionerType.Nurse)))
+{
+    <div class="margined-page pt-4">
+        <h1>Index</h1>
+
+        <p><a asp-controller="SMPAppointment" asp-action="SMPBookAppointment">Book A Patient In</a></p>
+        <table id="SMPApp1" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+            <thead>
+                <tr>
+                    <th>
+
+                        <p>Appointment Date</p>
+                    </th>
+                    <th>
+
+                        <p>Appointment Time</p>
+                    </th>
+                    <th>
+                        Appointment Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Where(p=>p.PractitionerId==practitionerId && p.Archived == false).ToList())
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PreferredDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PreferredTime)
+                        </td>
+
+                        <td>
+                            @if (item.SessionConfirmed)
+                            {
+                                <span class="text-success">Booking Confirmed With @item.Practitioner.Users.Titles. @item.Practitioner.Users.FirstName @item.Practitioner.Users.LastName</span>
+                            }
+                            else
+                            {
+                                <span>Booking Pending</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Update" asp-route-id="@item.Id"><i class="bi bi-pencil-fill"></i></a> |
+                            <a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-square-fill text-secondary"></i></a> |
+                            <a asp-action="Cancel" asp-route-id="@item.Id"><i class="bi bi-trash-fill text-danger"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+    <script>
+
+        var strValue = "@((string)ViewBag.VASuccessMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "success");
+        }
+
+        var strValue = "@((string)ViewBag.VAUpdateSuccessMessage)";
+        if (strValue !== null && strValue !== '') {
+            swal("", strValue, "success");
+        }
+
+    </script>
+}
+
+@* <p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                
+                <p>Reaction to Anaesthesia</p>
+            </th>
+            <th>
+                
+                <p>Description Of Reaction</p>
+            </th>
+            <th>
+                
+                <p>Has Had Breathing Tube Surgery</p>
+            </th>
+            <th>
+                
+                <p>Issues With Movement</p>
+            </th>
+            <th>
+                
+                <p> Has Had A Heart Attack</p>
+            </th>
+            <th>
+               
+                <p>Date Of Heart Attack</p>
+            </th>
+            <th>
+               
+               <p>Has Diabetes</p>
+            </th>
+            <th>
+                
+                <p>Takes Insulin</p>
+            </th>
+            <th>
+                
+                <p>Appointment Date</p>
+            </th>
+            <th>
+                
+                <p>Appointment Time</p>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SessionConfirmed)
+                
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Archived)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Patient)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Practitioner)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody> *@
+@*@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.AnaesthesiaReaction)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NatureOfReaction)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BreathingtubeSurgery)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Movement)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HeartAttack)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HeartAttackDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DiabetesQuestion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InsulinQuestion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PreferredDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PreferredTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SessionConfirmed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Archived)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Patient.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Practitioner.UserId)
+            </td>
+            <td>
+                <a asp-action="Update" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>*@
+
+

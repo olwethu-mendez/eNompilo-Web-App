@@ -1,0 +1,118 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.Family_Planning.FamilyPlanningAppointment>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="card-container" style="display:flex;justify-content:center">
+    @*  <div class="card login-logout-card" style="width:25%;border-radius:40px;"> *@
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-10 my-4">
+                <div class="row">
+                    <div class="col-12">
+                        <section>
+
+                            <div class="margined-page pt-4" style="margin-left:auto;margin-right:auto;">
+                                <p>
+                                    <form asp-controller="Message" asp-action="Inbox" method="get">
+                                        <button type="submit" class="btn btn-primary" style="margin-bottom: 10px;">View Messages</button>
+                                    </form>
+
+                                   
+                                    <form asp-controller="Family" asp-action="fPRecord" method="get">
+                                        <button type="submit" class="btn btn-secondary" style="margin-top: 10px;">View Records</button>
+                                    </form>
+                                </p>
+
+
+                                <table id="dtFamPlanApp" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.BookingReasons)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.PreferredDate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.PreferredTime)
+                                            </th>
+                                            @*<th>
+                                            @Html.DisplayNameFor(model => model.Patient)
+                                            </th>
+                                            <th>
+                                            @Html.DisplayNameFor(model => model.PatientFile)
+                                            </th>*@
+                                            <th>
+                                                Collection Status
+                                            </th>
+                                            <th>
+                                                View Patient
+                                            </th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.BookingReasons)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.PreferredDate)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.PreferredTime)
+                                                </td>
+                                                @*<td>
+                                            @Html.DisplayFor(modelItem => item.Patient.Email)
+                                            </td>
+                                            <td>
+                                            @Html.DisplayFor(modelItem => item.PatientFile.Id)
+                                            </td>*@
+
+                                                <td>
+                                                    @if (item.IsCollected == true)
+                                                    {
+                                                        <span>Collected</span>
+                                                    }
+                                                    else if (item.IsCollected == false)
+                                                    {
+                                                        <span>Pending</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>N/A</span> <!-- Display "N/A" for null values -->
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    <a asp-action="PatientDetails" asp-route-id="@item.PatientId"><i class="bi bi-info-square-fill text-secondary"></i></a>
+                                                   <a asp-action="Createrecord" metode="post"><i class="bi bi-plus"></i></a>
+                                                </td>
+                                                <td>
+                                                    <a asp-action="Detailz" asp-route-id="@item.Id"><i class="bi bi-info-circle"></i></a>
+                                                    @if (item.IsCollected == false)
+                                                    {
+                                                        <form asp-action="Collect" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Are you sure the correct patient has collected the correct prescription?');">
+                                                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> </button>
+                                                        </form>
+                                                    }
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* </div> *@
+</div>

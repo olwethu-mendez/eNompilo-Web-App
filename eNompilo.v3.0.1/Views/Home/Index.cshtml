@@ -1,0 +1,333 @@
+﻿@*@model eNompilo.v3._0._1.Models.ViewModels.HomePageViewModel;*@
+@using Microsoft.AspNetCore.Identity;
+@using eNompilo.v3._0._1.Areas.Identity.Data;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@using eNompilo.v3._0._1.Constants;
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-left">
+<div class="">
+        <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+            <div class="carousel-indicators" style="z-index: 1;">
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-caption d-none d-md-block" style="z-index: 1; top: 0; text-shadow: 2px 4px 3px rgba(0, 0, 0, 0.3); width:60%; margin-left: auto; margin-right: auto;">
+                    <h1 class="display-0.5 text-center paragraph-text text-light" style="font-weight: 500;">Join Us in Your Health Journey</h1>
+                </div>
+                <div class="carousel-item active" data-bs-interval="7000">
+                    <img src="~/img/carousel/carousel-1.jpg" class="caro-img d-block w-100" alt="..." loading="lazy">
+                </div>
+                <div class="carousel-item" data-bs-interval="7000">
+                    <img src="~/img/carousel/carousel-2.jpg" class="caro-img d-block w-100" alt="..." loading="lazy">
+                </div>
+                <div class="carousel-item" data-bs-interval="7000">
+                    <img src="~/img/carousel/carousel-3.jpg" class="caro-img d-block w-100" alt="..." loading="lazy">
+                </div>
+                <div class="carousel-caption d-none d-md-block" style="z-index: 1; font-size: 32px;">
+                    @if (!SignInManager.IsSignedIn(User) || User.IsInRole(RoleConstants.Patient))
+                    {
+                        <a asp-area="" asp-controller="GeneralAppointment" asp-action="Book" class="btn btn-primary" style="font-size: 24px;">Book Now</a>
+                    }
+                    else if (SignInManager.IsSignedIn(User) && (User.IsInRole(RoleConstants.Practitioner)) || (User.IsInRole(RoleConstants.Receptionist)) || (User.IsInRole(RoleConstants.Admin)))
+                    {
+                        //Should be nothing
+                    }
+                    @* else
+                    {
+                        <a asp-controller="Register" asp-action="Patient" class="btn btn-primary" role="button" aria-pressed="true" style="font-size: 24px;">Register</a>
+                    } *@
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+</div>
+    @if (SignInManager.IsSignedIn(User) && User.IsInRole(RoleConstants.Patient))
+    {
+    @* <div class="patientAppointment margined-page">
+            <table id="dtHomePageApps" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+                <thead>
+                    <tr>
+                        <th>Patient Issues/Struggles</th> <th>Preferred Date</th> <th>Preferred Time</th> <th>Appointment Type</th> <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.GeneralAppointments)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.PatientIssues)</td> <td>@Html.DisplayFor(modelItem => item.PreferredDate)</td> <td>@Html.DisplayFor(modelItem => item.PreferredTime)</td> <td>General Booking</td> <td><a asp-controller="GeneralAppointment" asp-action="Update" asp-route-id="@item.Id">Update</a> | <a asp-action="Details" asp-route-id="@item.Id">Details</a> | <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a> </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model.CounsellingAppointments)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.BookingReasons)</td> <td>@Html.DisplayFor(modelItem => item.PreferredDate)</td> <td>@Html.DisplayFor(modelItem => item.PreferredTime)</td> <td>Counselling Appointment</td> <td><a asp-action="Update" asp-route-id="@item.Id">Update</a> | <a asp-action="Details" asp-route-id="@item.Id">Details</a> | <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a> </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model.FamilyPlanningAppointments)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.BookingReasons)</td> <td>@Html.DisplayFor(modelItem => item.PreferredDate)</td> <td>@Html.DisplayFor(modelItem => item.PreferredTime)</td> <td>Family Planning Appointment</td> <td><a asp-action="Update" asp-route-id="@item.Id">Update</a> | <a asp-action="Details" asp-route-id="@item.Id">Details</a> | <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a> </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model.VaccinationAppointments)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.VaccinableDiseases)</td> <td>@Html.DisplayFor(modelItem => item.PreferredDate)</td> <td>@Html.DisplayFor(modelItem => item.PreferredTime)</td> <td>Vaccination Appointment</td> <td><a asp-action="Update" asp-route-id="@item.Id">Update</a> | <a asp-action="Details" asp-route-id="@item.Id">Details</a> | <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a> </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+    </div> *@
+}
+
+<div class="">
+    <div class="row" style="padding-top:60px; padding-bottom:40px;" id="about-us">
+            <div class="col margined-page d-flex justify-content-center flex-column">
+            <h4>About Us</h4>
+            <p>Welcome to eNompilo, your trusted partner in delivering comprehensive clinical care to individuals and families. We are dedicated to promoting the well-being and health of our community by offering a wide range of essential healthcare services. With a focus on vaccination, gender-based violence support, counseling, family planning, and specialized medical procedures, we strive to make a positive impact on the lives of those we serve.</p>
+        </div>
+        <div class="col margined-page">
+                <img src="~/img/about us.jpg" alt="about us" style="width:100%;height: 35vh;" loading="lazy"/>
+        </div>
+        
+    </div>
+    <div class="row" style="padding-top:0px; padding-bottom:40px;">
+        <div class="col margined-page">
+            <img src="~/img/our mission.jpg" alt="our misson" style="width:100%;height: 35vh;" loading="lazy"/>
+        </div>
+            <div class="col margined-page d-flex justify-content-center flex-column">
+                <h4>
+                    Our Mission
+                </h4>
+                <p>At eNompilo, our mission is to provide compassionate and accessible healthcare solutions to improve the overall health and quality of life for our patients. We are committed to delivering high-quality clinical care services that are responsive to the unique needs of every individual.</p>
+            </div>
+    </div>
+        
+
+
+    <div class="row" style="padding-top:60px; padding-bottom:60px; padding-left:70px; background:#ced4f8;">
+        <div class="col-md-6 image-text-section">
+            <h3>Why Choose Us</h3>
+            <ul>
+                <li><b>Compassion and Care:</b> Our team is driven by a genuine desire to help others. We treat every patient with compassion, respect, and dignity.</li>
+
+                <li><b>Qualified Professionals:</b> Our healthcare professionals are experienced and dedicated to delivering the best possible care. We continuously invest in their education and training to stay up-to-date with the latest advancements in healthcare.</li>
+
+                <li><b>Confidentiality:</b> We prioritize patient privacy and confidentiality in all our services, ensuring a safe and comfortable environment for all.</li>
+
+                <li><b>Community-Centered:</b> We are deeply rooted in our community and are proud to serve the diverse needs of our patients.</li>
+
+                <li><b>Accessible Care:</b> We strive to make healthcare accessible to all, irrespective of age, gender, or socioeconomic background.</li>
+            </ul>
+        </div>
+            <div class="col-md-6 image-text-section align-content-center" style="display: flex; justify-content: center;">
+                <img src="~/img/Screenshot (199).png" loading="lazy"/>
+            </div>
+    </div>
+
+    @* Our Services *@
+    <h3 style="padding-top:80px;" class="margined-page w-auto" id="services"> Our Services </h3>
+    <div style="padding-top:40px; padding-bottom:40px; flex-wrap:wrap; gap: 20px;" class="margined-page d-flex">
+        <div class="card bg-light border-1 services-card" style="width: 325px; height: 525px;">
+            <img class="card-img-top text-center" src="~/img/services/counselling.jpg" alt="Card image cap" loading="lazy">
+            <div class="card-body d-flex flex-column justify-content-evenly">
+                <h5 class="card-title text-center">Counselling</h5>
+                    <p class="card-text">Our licensed counselors provide empathetic and confidential counseling sessions to help individuals navigate life's challenges, manage stress, and improve their mental health.</p>
+            </div>
+        </div>
+
+        <div class="card bg-light border-1 services-card" style="width: 325px; height: 525px;">
+            <img class="card-img-top text-center" src="~/img/services/family planning.jpg" alt="Card image cap" loading="lazy">
+            <div class="card-body d-flex flex-column justify-content-evenly">
+                <h5 class="card-title text-center">Family Planning</h5>
+                    <p class="card-text"> Our knowledgeable healthcare providers offer a range of family planning options, ensuring individuals and couples have access to the resources they need to plan their families effectively.</p>
+            </div>
+        </div>
+
+        <div class="card bg-light border-1 services-card" style="width: 325px; height: 525px;">
+            <img class="card-img-top text-center" src="~/img/services/gbv.jpg" alt="Card image cap" loading="lazy">
+            <div class="card-body d-flex flex-column justify-content-evenly">
+                <h5 class="card-title text-center">Gender-Based Violence</h5>
+                    <p class="card-text">Our team of compassionate counselors and advocates offer confidential support, guidance, and resources to help survivors on their path to healing and empowerment.</p>
+            </div>
+        </div>
+
+        <div class="card bg-light border-1 services-card" style="width: 325px; height: 525px;">
+            <img class="card-img-top text-center" src="~/img/services/smp.jpg" alt="Card image cap" loading="lazy">
+            <div class="card-body d-flex flex-column justify-content-evenly">
+                <h5 class="card-title text-center">Specialized Medical Procedurers.</h5>
+                    <p class="card-text">Our highly skilled medical team offers a variety of specialized medical procedures, ranging from diagnostics to treatments.</p>
+            </div>
+        </div>
+
+        <div class="card bg-light border-1 services-card" style="width: 325px; height: 525px;">
+            <img class="card-img-top text-center" src="~/img/services/vaccination.jpg" alt="Card image cap" loading="lazy">
+            <div class="card-body d-flex flex-column justify-content-evenly">
+                <h5 class="card-title text-center">Vaccination</h5>
+                    <p class="card-text">Our experienced healthcare professionals ensure that patients receive timely and appropriate vaccinations, safeguarding them from various illnesses.</p>
+            </div>
+        </div>
+
+            
+    </div>
+
+    @* Frequently Asked Questions *@
+    <div  style="padding-top:10px; padding-bottom:60px; background:#ced4f8;" id="faq">
+        <h3 style="padding-top:40px;" class="margined-page" id="faqs"> Frequently Asked Questions </h3>
+        <div class="accordion accordion-flush margined-page" id="accordionFlushExample" style="padding-top:20px; padding-bottom:0px;">
+                <div class="accordion-item" style="background:#ced4f8;">
+                <h2 class="accordion-header" id="flush-headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne" style="background:#e4e7fb;">
+                        Vaccination Services
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>
+                                <h6><strong>Q: What vaccines are available, and who is eligible to receive them?</strong></h6>
+                                <p>A: We offer a range of vaccines, including those for preventable diseases like measles, flu, and COVID-19. Eligibility may vary, but generally, vaccines are available for all age groups, and some are recommended for specific populations.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: How often should I get vaccinated?</strong></h6>
+                                <p>A: The vaccination schedule varies depending on the vaccine and your age group. Our healthcare professionals will provide you with personalized guidance during your visit.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: Are there any potential side effects or risks associated with vaccinations?</strong></h6>
+                                <p>A: Most vaccines have mild and temporary side effects like soreness at the injection site or mild fever. Serious side effects are extremely rare. Our staff will discuss any concerns you may have before vaccination.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item" style="background:#ced4f8;">
+                <h2 class="accordion-header" id="flush-headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo" style="background:#e4e7fb;">
+                        Gender-Based Violence Support
+                    </button>
+                </h2>
+                <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>
+                                <h6><strong>Q: What services are offered for survivors of gender-based violence?</strong></h6>
+                                <p>A: We provide comprehensive support, including medical care, counseling, legal assistance, and safe spaces for survivors. Our dedicated team is here to help you.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: How can I access support if I or someone I know is a victim of gender-based violence?</strong></h6>
+                                <p>A: You can contact our helpline or visit our healthcare facility. We have trained professionals available 24/7 to assist you.</p>
+                            </li>
+                            <li>
+                                <h6><strong> Q: Are there trained professionals who can help with legal and emotional support?</strong></h6>
+                                <p>A: Yes, we have a team of counselors, social workers, and legal experts to support survivors in their healing process.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item" style="background:#ced4f8;">
+                <h2 class="accordion-header" id="flush-headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree" style="background:#e4e7fb;">
+                        Counseling Services
+                    </button>
+                </h2>
+                <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>
+                                <h6><strong>Q: What types of counseling are available, and for whom?</strong></h6>
+                                <p>A: We offer individual, couples, family, and group counseling for various mental health concerns, relationship issues, and life challenges. Counseling is available for individuals of all ages.</p>
+                            </li>
+                            <li>
+                                <h6><strong> Q: How can I schedule a counseling appointment?</strong></h6>
+                                <p>A: You can schedule an appointment by calling our counseling center or using our online booking system.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: Is counseling confidential?</strong></h6>
+                                <p> A: Yes, all counseling sessions are confidential, and your privacy is our priority.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item" style="background:#ced4f8;">
+                <h2 class="accordion-header" id="flush-headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour" style="background:#e4e7fb;">
+                        Specialized Medical Procedures
+                    </button>
+                </h2>
+                <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>
+                                <h6><strong>Q: What specialized medical procedures are offered in this healthcare system?</strong></h6>
+                                <p>A: We provide a wide range of specialized medical procedures, including surgeries, diagnostic tests, and treatments for various conditions. Please consult with your healthcare provider for more information.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: How can I determine if I need a specialized procedure, and how do I access it?</strong></h6>
+                                <p> A: Your primary care physician will assess your condition and refer you to a specialist if necessary. We will guide you through the process.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item" style="background:#ced4f8;">
+                <h2 class="accordion-header" id="flush-headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFive" aria-expanded="false" aria-controls="flush-collapseFive" style="background:#e4e7fb;">
+                        Family Planning Services
+                    </button>
+                </h2>
+                <div id="flush-collapseFive" class="accordion-collapse collapse" aria-labelledby="flush-headingFive" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>
+                                <h6><strong>Q: What family planning services are provided?</strong></h6>
+                                <p>A: We offer contraception options, family planning counseling, preconception care, prenatal and postnatal care, and support for reproductive health.</p>
+                            </li>
+                            <li>
+                                <h6><strong>Q: How can I access contraception and family planning advice?</strong></h6>
+                                <p>A: You can make an appointment with our family planning clinic, where our experts will discuss your options and provide the necessary guidance.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+                            @section scripts{
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+                                <script>
+
+                                    var strValue = "@((string)ViewBag.SuccessMessage)";
+                                    if(strValue !== null && strValue !== ''){
+                                        swal("", strValue, "success");
+                                    }
+
+                                </script>
+
+                            }

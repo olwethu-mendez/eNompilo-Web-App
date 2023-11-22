@@ -1,0 +1,28 @@
+﻿
+@{
+	ViewData["Title"] = "Splash Screen";
+	Layout = "~/Views/Shared/_SplashScreen.cshtml";
+}
+
+
+<div class="flip-container">
+	<div class="flipper">
+		<div class="front d-flex justify-content-center align-items-center">
+			<img src="~/img/Adobe_Express_20230527_0911500_3_4496_-removebg-preview.png"  alt="Front Image" height="350"/> 
+		</div>
+		<div class="back d-flex justify-content-center align-items-center">
+			<img src="~/img/Snake logo.png" alt="Back Image" height="350"/>
+		</div>
+	</div>
+</div>
+
+<div >
+	<img src="~/img/Adobe_Express_20230527_0911500_1_4494_-removebg-preview.png" alt="e-Nompilo" height="80"  style="position:absolute; right:0; bottom:0;"/>
+</div>
+
+
+<script>
+	setTimeout(function() {
+		window.location.href = '@Url.Action("Index", "Home")' //will redirect me to my main view on the home controller
+	}, 5000); //will call my function after 5000ms
+</script>

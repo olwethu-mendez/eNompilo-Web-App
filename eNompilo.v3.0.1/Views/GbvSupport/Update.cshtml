@@ -1,0 +1,76 @@
+﻿@model eNompilo.v3._0._1.Models.GBV.SupportMembership
+@using eNompilo.v3._0._1.Constants;
+@inject IHttpContextAccessor contextAccessor
+
+@{
+    ViewData["Title"] = "Update";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="margined-page pt-4">
+    <h2>Register Now</h2>
+    <hr />
+    <div class="row align-items-center">
+        <div class="col-md-4" style="margin-left:auto;margin-right:auto;">
+            <form asp-action="Update">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-4" >
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control"  />
+                </div>
+                <div class="form-group mb-4" >
+                <label asp-for="Surname" class="control-label"></label>
+                <input asp-for="Surname" class="form-control" />
+               </div>
+                <div class="form-group mb-4">
+                    <label asp-for="Cell" class="control-label"></label>
+                    <input asp-for="Cell" class="form-control" />
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="gender" class="control-label"></label>
+                    <select asp-for="gender" class="form-control">
+                        <option disabled selected hidden>Please select an option</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <span asp-validation-for="gender" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="Reported" class="control-label"></label>
+                    <select asp-for="Reported" class="form-control">
+                        <option disabled selected hidden>Please select an option</option>
+                        <option value=@true>Yes</option>
+                        <option value=@false>No</option>
+                    </select>
+                    <span asp-validation-for="Reported" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+                <div class="form-group">
+                </div>
+                </form>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Home" asp-action="Index">Back to List</a>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+    </script>
+
+
+
+
+
+}
+        

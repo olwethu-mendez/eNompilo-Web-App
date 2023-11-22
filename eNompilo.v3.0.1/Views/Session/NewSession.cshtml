@@ -1,0 +1,201 @@
+﻿@model eNompilo.v3._0._1.Models.Session
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+	ViewData["Title"] = "NewSession";
+	Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+	int patientId = Convert.ToInt32(contextAccessor.HttpContext.Session.GetString("SessPatId"));
+	var patient = _context.tblPatient.Where(x => x.Id == patientId).FirstOrDefault();
+	// var practitioner = _context.tblPractitioner.Select(p => new SelectListItem
+	// 		{
+	// 			Value = p.Id.ToString(),
+	// 			Text = p.Users.FirstName + " " + p.Users.LastName + " (" + p.PractitionerType.GetDisplayName() + ")",
+	// 			/*Text = "(" + Enum.GetName(typeof(Titles), p.Users.Titles) + ".) " + p.Users.FirstName + " " + p.Users.LastName,*/
+	// 		}).ToList();
+}
+
+<div class="margined-page pt-4">
+	<h1>New Clinic Visit</h1>
+
+	<h2>Session for @patient.FirstName @patient.MiddleName @patient.LastName</h2>
+	<hr />
+	<div class="row d-flex align-items-center">
+		<div class="col-md-4" style="margin-left:auto;margin-right:auto;">
+			<form asp-action="NewSession" method="post">
+				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-4" hidden>
+                    <label asp-for="PatientId" class="control-label"></label>
+					<input asp-for="PatientId" class="form-control" value="@patientId" />
+                    <span asp-validation-for="PatientId" class="text-danger"></span>
+                </div>
+
+				<div class="form-group mb-4" hidden>
+					<label asp-for="PractitionerId" class="control-label"></label>
+					<input asp-for="PractitionerId" class="form-control" value="@_context.tblPractitioner.Where(p=>p.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().Id" />
+					<span asp-validation-for="PractitionerId" class="text-danger"></span>
+				</div>
+				<div class="form-group form-check mb-4">
+					<label class="form-check-label">
+						<input class="form-check-input" id="hideCheckbox" asp-for="Arrived" /> @Html.DisplayNameFor(model => model.Arrived)
+					</label>
+				</div>
+				<div hidden>
+					<div class="form-group mb-4">
+                        <label asp-for="GeneralAppointment" class="control-label"></label>
+                        <input asp-for="GeneralAppointmentId" value="@ViewBag.gaId" class="form-control" />
+                        <span asp-validation-for="GeneralAppointmentId" class="text-danger"></span>
+                    </div>
+					<div class="form-group mb-4">
+                        <label asp-for="CounsellingAppointment" class="control-label"></label>
+                        <input asp-for="CounsellingAppointmentId" value="@ViewBag.caId" class="form-control" />
+                        <span asp-validation-for="CounsellingAppointmentId" class="text-danger"></span>
+                    </div>
+					<div class="form-group mb-4">
+                        <label asp-for="FamilyPlanningAppointment" class="control-label"></label>
+                        <input asp-for="FamilyPlanningAppointmentId" value="@ViewBag.fpaId" class="form-control" />
+                        <span asp-validation-for="FamilyPlanningAppointmentId" class="text-danger"></span>
+                    </div>
+					<div class="form-group mb-4">
+                        <label asp-for="VaccinationAppointment" class="control-label"></label>
+                        <input asp-for="VaccinationAppointmentId" value="@ViewBag.vaId" class="form-control" />
+                        <span asp-validation-for="VaccinationAppointmentId" class="text-danger"></span>
+                    </div>
+				</div>
+				
+				<div id="hideDiv">
+					<div class="form-group mb-4">
+						<label asp-for="ArrivalTime" class="control-label"></label>
+						<input asp-for="ArrivalTime" class="form-control" />
+						<span asp-validation-for="ArrivalTime" class="text-danger"></span>
+					</div>
+					<div class="form-group mb-4">
+						<label asp-for="PractitionerNotes" class="control-label"></label>
+						<textarea asp-for="PractitionerNotes" class="form-control"></textarea>
+						<span asp-validation-for="PractitionerNotes" class="text-danger"></span>
+					</div>
+					<div class="form-group mb-4">
+						<label asp-for="ConditionIndication" class="control-label"></label>
+						<select asp-for="ConditionIndication" class="form-control">
+							<option value=@false selected>No</option>
+							<option value=@true>Yes</option>
+						</select>
+						<span asp-validation-for="ConditionIndication" class="text-danger"></span>
+					</div>
+					<div class="form-group mb-4">
+						<label asp-for="PotentialCondition" class="control-label"></label>
+						<input asp-for="PotentialCondition" class="form-control" />
+						<span asp-validation-for="PotentialCondition" class="text-danger"></span>
+					</div>
+
+					<div class="form-group mb-4">
+						<label asp-for="IsADanger" class="control-label"></label>
+						<select asp-for="IsADanger" class="form-control">
+							<option value=@false selected>No</option>
+							<option value=@true>Yes</option>
+						</select>
+						<span asp-validation-for="IsADanger" class="text-danger"></span>
+					</div>
+
+					<div class="form-group mb-4">
+						<label asp-for="IsAbused" class="control-label"></label>
+                        <select asp-for="IsAbused" class="form-control">
+							<option value=@false selected>No</option>
+							<option value=@true>Yes</option>
+						</select>
+						<span asp-validation-for="IsAbused" class="text-danger"></span>
+					</div>
+					<div class="form-group mb-4">
+						<label asp-for="Prescription" class="control-label"></label>
+						<input asp-for="Prescription" class="form-control" />
+						<span asp-validation-for="Prescription" class="text-danger"></span>
+					</div>
+					<div class="form-group mb-4">
+						<label asp-for="EndTime" class="control-label"></label>
+						<input asp-for="EndTime" class="form-control" />
+						<span asp-validation-for="EndTime" class="text-danger"></span>
+					</div>
+				</div>
+
+				<div class="form-group form-check" hidden>
+					<label class="form-check-label">
+						<input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
+					</label>
+				</div>
+				<div class="form-group">
+					<input type="submit" value="Create" class="btn btn-primary" />
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div>
+		<a asp-action="Index">Back to List</a>
+	</div>
+</div>
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+	<script>
+		window.onload = function () {
+			var checkbox = document.getElementById('hideCheckbox');
+			var hiddenDiv = document.getElementById('hideDiv');
+
+			checkbox.addEventListener('change', function () {
+				if (checkbox.checked) {
+					hiddenDiv.style.display = 'block';
+				} else {
+					hiddenDiv.style.display = 'none';
+				}
+			});
+
+			// function showDiv() {
+			//     var selectedOption = document.getElementById("roleChanged").value;
+			//     var adminGroup = document.getElementById("admin-group");
+			//     var patientGroup = document.getElementById("patient-group");
+			//     var practitionerGroup = document.getElementById("practitioner-group);
+			//     var receptionistGroup = document.getElementById("receptionist-group");
+
+			//     if (selectedOption == "val_Admin") {
+			//         adminGroup.style.display = "block";
+			//         patientGroup.style.display = "none";
+			//         practitionerGroup.style.display = "none";
+			//         receptionistGroup.style.display = "none";
+			//     } else if (selectedOption == "val_Patient") {
+			//         patientGroup.style.display = "block";
+			//         adminGroup.style.display = "none";
+			//         practitionerGroup.style.display = "none";
+			//         receptionistGroup.style.display = "none";
+			//     } else if (selectedOption == "val_Practitioner") {
+			//         practitionerGroup.style.display = "block";
+			//         adminGroup.style.display = "none";
+			//         patientGroup.style.display = "none";
+			//         receptionistGroup.style.display = "none";
+			//     } else if (selectedOption == "val_Receptionist") {
+			//         receptionistGroup.style.display = "block";
+			//         adminGroup.style.display = "none";
+			//         patientGroup.style.display = "none";
+			//         practitionerGroup.style.display = "none";
+			//     } else {
+			//         adminGroup.style.display = "none";
+			//         patientGroup.style.display = "none";
+			//         practitionerGroup.style.display = "none";
+			//         receptionistGroup.style.display = "none";
+			//     }
+			// };
+
+			// Trigger change event to set initial visibility
+			checkbox.dispatchEvent(new Event('change'));
+		};
+	</script>
+}
+

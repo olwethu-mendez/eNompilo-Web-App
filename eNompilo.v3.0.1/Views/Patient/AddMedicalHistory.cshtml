@@ -1,0 +1,81 @@
+﻿@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@model eNompilo.v3._0._1.Models.SystemUsers.MedicalHistory;
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@inject IHttpContextAccessor contextAccessor;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+    ViewData["Title"] = "AddMedicalHistory";
+    Layout = "~/Views/Shared/_AuthenticationLayout.cshtml";
+}
+
+<div class="container">
+    <div class="row" >
+		<form asp-action="AddMedicalHistory" method="post" class="p-5">
+
+            <h2 style="color: #2036d9;"><strong>Medical History</strong></h2>
+			<hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-4" hidden>
+                <label asp-for="PatientId" class="control-label"></label>
+                <input asp-for="PatientId" class="form-control" value="@_context.tblPatient.Where(x=>x.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().Id" />
+            </div>
+                <div class="form-group mb-4">
+                    <label asp-for="PreviousDiagnoses" class="control-label"></label>
+                    <textarea asp-for="PreviousDiagnoses" class="form-control" ></textarea>
+                    <span asp-validation-for="PreviousDiagnoses" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="PreviousMedication" class="control-label"></label>
+                    <textarea asp-for="PreviousMedication" class="form-control" ></textarea>
+                    <span asp-validation-for="PreviousMedication" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="GeneralAllergies" class="control-label"></label>
+                    <textarea asp-for="GeneralAllergies" class="form-control" ></textarea>
+                    <span asp-validation-for="GeneralAllergies" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="MedicationAllergies" class="control-label"></label>
+                    <textarea asp-for="MedicationAllergies" class="form-control" ></textarea>
+                    <span asp-validation-for="MedicationAllergies" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                <input type="submit" value="Create" class="btn btn-primary w-100" style="background-color: #1e36cc; color:#ced4f8;" />
+                </div>
+            </form>
+    </div>
+</div>
+
+
+@* <span class="btn btn-secondary" href="#" data-bs-toggle="modal" data-bs-target="#modalFileCreated"></span>
+
+<div class="modal fade" id="modalFileCreated" tabindex="-1" aria-labelledby="modalFileCreatedLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFileCreatedLabel">Congratulations!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Your have been successfully registered as a patient with an account at the eNompilo Web System.<br />
+                A file has been created for you and you can now use our system to book appointments and access<br />
+                our other online services.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

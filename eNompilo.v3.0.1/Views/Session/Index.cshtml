@@ -1,0 +1,120 @@
+﻿@model IEnumerable<eNompilo.v3._0._1.Models.Session>
+@using Microsoft.AspNetCore.Identity;
+@using System.Collections;
+@using eNompilo.v3._0._1.Constants;
+@using eNompilo.v3._0._1.Models.SystemUsers;
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor contextAccessor
+@inject eNompilo.v3._0._1.Areas.Identity.Data.ApplicationDbContext _context
+
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h1>Clinic Visit Records</h1>
+
+<p>
+	<a asp-action="NewSession">Create New</a>
+</p>
+<table id="dtGenApp" class="table table-striped" style="margin-left:auto;margin-right:auto;">
+	<thead>
+		<tr>
+			<th>
+				Patient
+			</th>
+			<th>
+				Practitioner
+			</th>
+			<th>
+				Has Patient Arrived
+			</th>
+			<th>
+				Is Patient Danger
+			</th>
+			<th>
+				Is Patient Abused
+			</th>
+			<th>
+				Prescriptions
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.Where(x=>x.PractitionerId == _context.tblPractitioner.Where(x=>x.UserId == UserManager.GetUserAsync(User).Result.Id).FirstOrDefault().Id))
+		{
+			<tr>
+                <td data-cell="Patient">
+					@Html.DisplayFor(modelItem => item.Patient.FirstName) @Html.DisplayFor(modelItem => item.Patient.MiddleName) @Html.DisplayFor(modelItem => item.Patient.LastName)
+				</td>
+                <td data-cell="Practitioner">
+					@Html.DisplayFor(modelItem => item.Practitioner.Users.FirstName) @Html.DisplayFor(modelItem => item.Practitioner.Users.MiddleName) @Html.DisplayFor(modelItem => item.Practitioner.Users.LastName) (@Html.DisplayFor(modelItem => item.Practitioner.Users.Titles).)
+				</td>
+				@if (item.Arrived)
+				{
+                    <td data-cell="Has Patient Arrived">Yes</td>
+				}
+				else
+				{
+                    <td data-cell="Has Patient Arrived">No</td>
+				}
+				@if (item.IsADanger == true)
+				{
+                    <td data-cell="Is Patient Danger">Patient may be a danger to themselves</td>
+				}
+				else if (item.Arrived == false)
+				{
+                    <td data-cell="Is Patient Danger"></td>
+				}
+				else
+				{
+                    <td data-cell="Is Patient Danger">Patient poses no danger to themselves</td>
+				}
+
+				@if (item.IsAbused == true)
+				{
+
+                    <td data-cell="Is Patient Abused">
+						Patient is an abuse victim
+					</td>
+				}
+				else if (item.Arrived == false)
+				{
+                    <td data-cell="Is Patient Abused"></td>
+				}
+				else
+				{
+                    <td data-cell="Is Patient Abused">
+						Patient is not abused
+					</td>
+
+				}
+                <td data-cell="Prescriptions">
+					@Html.DisplayFor(modelItem => item.Prescription)
+				</td>
+				<td data-cell="Actions">
+					<a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+					<a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" />
+
+@section scripts{
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+
+	<script>
+
+		var strValue = "@((string)ViewBag.SessionSuccessMessage)";
+		if (strValue !== null && strValue !== '') {
+			swal("", strValue, "success");
+		}
+
+	</script>
+
+                            }
